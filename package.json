@@ -1,0 +1,33 @@
+{
+  "name": "Algorithms",
+  "version": "1.0.0",
+  "description": "- 线性表\r   - [数组](./Array)\r   - [链表](./LinkedList)\r   - [栈](./Stack)\r   - [队列](./Queue)\r   - [跳表](./LinkedList)\r   - [散列表](./LinkedList)\r - 树\r   - [二叉树](./BinaryTree)\r   - 平衡二叉树\r   - 堆\r - [图](./Graph)",
+  "main": "index.js",
+  "scripts": {
+    "commit": "git-cz",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ybb926426/Algorithms.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ybb926426/Algorithms/issues"
+  },
+  "homepage": "https://github.com/ybb926426/Algorithms#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^12.1.1",
+    "@commitlint/config-conventional": "^12.1.1",
+    "commitizen": "^4.2.3",
+    "cz-conventional-changelog": "^3.3.0",
+    "cz-customizable": "^6.3.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-customizable"
+    }
+  }
+}
