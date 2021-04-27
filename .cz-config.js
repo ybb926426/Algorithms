@@ -1,7 +1,7 @@
 module.exports = {
   // type 类型（定义之后，可通过上下键选择）
   types: [
-    { value: 'feat', name: 'feat:     新增功能' },
+    { value: 'add', name: 'add:     新增算法' },
     { value: 'fix', name: 'fix:      修复 bug' },
     { value: 'docs', name: 'docs:     文档变更' },
     { value: 'style', name: 'style:    代码格式（不影响功能，例如空格、分号等格式修正）' },
