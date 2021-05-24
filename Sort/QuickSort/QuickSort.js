@@ -1,3 +1,5 @@
+// 快速排序也是利用分治思想
+// 思想是 如果要排序数组中下标p到r之间的一组数据，我们选择p到r之间的任意一个数据作为 pivot（分区点）
 
 const QuickSort = (arr) => {
   const length = arr.length;
