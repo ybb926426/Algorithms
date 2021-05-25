@@ -1,5 +1,5 @@
 {
-  "name": "Algorithms",
+  "name": "algorithms",
   "version": "1.0.0",
   "description": "- 线性表\r   - [数组](./Array)\r   - [链表](./LinkedList)\r   - [栈](./Stack)\r   - [队列](./Queue)\r   - [跳表](./LinkedList)\r   - [散列表](./LinkedList)\r - 树\r   - [二叉树](./BinaryTree)\r   - 平衡二叉树\r   - 堆\r - [图](./Graph)",
   "main": "index.js",

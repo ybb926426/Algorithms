@@ -1,3 +1,8 @@
+## 什么是设计模式
+模式是一种可复用的解决方案，用于解决软件设计中遇到的常见问题
+
+换个通俗的说法：设计模式是解决某个特定场景下对各种问题的解决方案，因此，当我们遇到合适的场景，我们可能会条件反射一样自然而然想到符合这种场景的设计模式
+
 ## 单例模式
 保证一个类仅有一个示例，并提供一个访问他的全局访问点。实现的放法为先判断实例存在与否，如果存在直接返回，如果不存在就创建了再返会，这就确保了一个类只有一个实例对象
 - 试用场景：一个单一对象。比如：弹窗，无论点击多少次，弹窗只应该被创建一次
@@ -145,8 +150,35 @@ Function.prototype.after = function (fn) {
 ```
 ## 适配器模式
 采用适配器模式，将不同的数据结构适配成展示组件所能接受的数据结构
-```javascript
 
+主要用于解决两个接口之间不匹配的问题
+```javascript
+// 老接口
+const zhejiangCityOld = (function () {
+  return [
+    {
+      name: 'hangzhou',
+      id: 11,
+    },
+    {
+      name: 'jinhua',
+      id: 12
+    }
+  ]
+})()
+console.log(getZhejiangCityOld())
+// 新接口希望是下面形式
+{
+  hangzhou: 11,
+  jinhua: 12,
+}
+const adaptor = (function() {
+  const obj = {};
+  for(let city of zhejiangCityOld) {
+    obj[city.name] = city.id
+  }
+  return obj;
+})()
 ```
 
 ## 代理模式
@@ -253,7 +285,68 @@ order(3, true, 500) // 普通购买, 无优惠券
 
 ## 观察者模式
 - 场景一 当观察的数据对象发生变化时，自动调用相应的函数。比如vue的双向绑定
+```javascript
+var obj = {
+  data: { list: [] }
+}
+Object.defineProperty(obj, 'list', {
+  get() {
+    return this.data['list'];
+  },
+  set(val) {
+    console.log('值被更改了');
+    this.data['list'] = val;
+  }
+})
+```
+```javascript
+// Proxy/Reflect 是 ES6 引入的新特性, 也可以使用其完成观察者模式, 示例如下(效果同上):
+var obj = {
+  value: 0
+}
+var proxy = new Proxy(obj, {
+  set: function(target, key, value, receiver) {
+    console.log('调用相应函数')
+    Reflect.set(target, key, value, receiver)
+  }
+})
+obj.value = 1; // 调用相应的函数
+```
 - 场景二 当调用对象里的某个方法时，就回调用相应的访问逻辑。比如给测试框架赋能的spy函数
+```javascript
+// 下面来实现 sinon 框架的 spy 函数
+const sinon = {
+  analyze: {},
+  spy: function (obj, fnName) {
+    const that = this;
+    const oldFn = Object.getOwnPropertyDescriptor(obj, fnName).value;
+    Object.defineProperty(obj, fnName, {
+      value: function() {
+        oldFn()
+        if (that.analyze[fnName]) {
+          that.analyze[fnName].count = ++that.analyze[fnName].count
+        } else {
+          that.analyze[fnName] = {}
+          that.analyze[fnName].count = 1
+        }
+        console.log(`${fnName} 被调用了 ${that.analyze[fnName].count} 次`)
+      }
+    })
+  }
+}
+const obj = {
+  someFn: function() {
+    console.log('my name is someFn')
+  }
+}
+sinon.spy(obj, 'someFn')
+obj.someFn()
+// my name is someFn
+// someFn 被调用了 1 次
+obj.someFn()
+// my name is someFn
+// someFn 被调用了 2 次
+```
 
 ## 总结各设计模式的关键词
 <table><tbody>
