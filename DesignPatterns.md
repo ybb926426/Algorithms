@@ -3,9 +3,14 @@
 
 换个通俗的说法：设计模式是解决某个特定场景下对各种问题的解决方案，因此，当我们遇到合适的场景，我们可能会条件反射一样自然而然想到符合这种场景的设计模式
 
+在将函数作为一等公民的对象语言中，有许多需要利用对象多态性的设计模式，比如命令模式、策略模式等，这些模式的结构与传统面向对象语言的结构大相径庭；
+
 ## 单例模式
-保证一个类仅有一个示例，并提供一个访问他的全局访问点。实现的放法为先判断实例存在与否，如果存在直接返回，如果不存在就创建了再返会，这就确保了一个类只有一个实例对象
-- 试用场景：一个单一对象。比如：弹窗，无论点击多少次，弹窗只应该被创建一次
+定义：保证一个类仅有一个实例，并提供一个访问它的全局访问点。
+单例模式的核心是 确保只有一个实例，并提供全局访问
+实现的方法为用一个变量先判断实例存在与否，如果存在直接返回，如果不存在就创建了再返会，这就确保了一个类只有一个实例对象
+- 试用场景：一个单一对象。比如：登录弹窗，无论点击多少次，弹窗只应该被创建一次
+用代理来实现单例模式
 ```javascript
 class CreateUser {
   constructor(name) {
@@ -17,7 +22,7 @@ class CreateUser {
   }
 }
 var ProxyMode = (function() {
-  var instance = null;
+  var instance;
   return function(name) {
     if (!instance) {
       instance = new CreateUser(name);
@@ -30,12 +35,43 @@ var a = new ProxyMode('aaa');
 var b = new ProxyMode('bbb');
 console.log(a === b); // 因为单体模式是只实例化一次，所以下面的实例是相等的
 ```
+惰性单例
+惰性单例指的是在需要的时候才创建对象实例
+```javascript
+var getSingle = function(fn) {
+  var result;
+  return function() {
+    return result || (result = fn.apply(this, argeuments));
+  }
+}
+var createLoginLayer = function() {
+  var div = document.createElement('div');
+  div.innerHtml = '我是登录浮窗';
+  div.style.display = 'none';
+  document.body.appendChild(div);
+  return div; 
+}
+document.getElementById('loginBtn').onclick = function() {
+  var loginLayer = createLoginLayer();
+  loginLayer.style.display = 'block';
+}
+var createSingleIframe = function() {
+  var iframe = document.createElement('iframe');
+  document.body.appendChild(iframe);
+  return iframe; 
+}
+document.getElementById('loginBtn').onclick = function() {
+  var loginLayer = createSingleIframe();
+  loginLayer.style.display = 'block';
+}
+```
+
 
 ## 策略模式
-定义一系列的算法，把他们一个个封装起来，并且使他们可以相互替换或相互转换
+定义一系列的算法，把它们一个个封装起来，并且使它们可以相互替换。
 - 一个基于策略模式的程序至少由两部分组成：
   - 一组策略类（可变），封装了具体算法，并负责具体的计算过程
-  - 环境类 （context 不变）context接受客户的请求，随后将请求委托给一个策略类
+  - 环境类 （Context 不变）context接受客户的请求，随后将请求委托给一个策略类
 - 什么时候使用
   - 各判断条件下的策略相互独立且可复用
   - 策略内部逻辑相对复杂
@@ -58,7 +94,104 @@ var calculateBouns = function(level, money) {
   return levelOBJ[level](money);
 }
 console.log(calculateBouns('A',10000)); // 40000
+console.log(calculateBouns('B',10000)); // 30000
 ```
+用策略模式来实现表单校验
+```javascript
+var strategies = {
+  isNotEmpty: function(value, errMsg) {
+    if (value === '') {
+      return errMsg;
+    }
+  },
+  minLength: function(value, length, errMsg) {
+    if (value.length < length) {
+      return errMsg;
+    }
+  }
+}
+var Validator = function() {
+  this.cache = []; // 保存校验规则
+}
+Validator.prototype.add = function(dom, rule, errMsg) {
+  var ary = rule.split(':'); // 把strategy和参数分开
+  this.cache.push(function() {
+    var strategy = ary.shift();  // 用户的strategy
+    ary.unshift(dom.value); // 把input的value添加进参数列表
+    ary.push(errMsg); // 把errmsg添加进参数列表
+    return strategies[strategy].apply(dom, ary);
+  })
+}
+Validator.prototype.start = function() {
+  for(var i = 0, vaidatorFunc; vaidatorFunc = this.cache[i++]; ) {
+    var msg = vaidatorFunc();
+    if (msg) {
+      return msg;
+    }
+  }
+}
+var registerForm = document.getElementById('registerForm');
+var validator = new Validator();
+validator.add(registerForm.userName, 'isNotEmpty', '用户名不能为空');
+validator.add(registerForm.userName, 'minLength: 10', '用户名长度不能小于10位');
+```
+
+## 代理模式
+所谓的代理模式就是为一个对象找一个替代对象，以便对源对象进行访问
+常用的虚拟代理形式：某一个花销很大的操作，可以通过虚拟代理的方式延迟到这种需要它的时候才去创建
+- 保护代理
+- 虚拟代理
+  - 图片预加载
+  ```javascript
+  const myImage = (function () {
+    const imageNode = document.createElement('img');
+    document.body.appendChild(imageNode);
+    return {
+      setSrc: function (src) {
+        iamgeNode.src = src;
+      }
+    }
+  })()
+  const proxyImage = (function () {
+    const image = new Image();
+    image.onload = function() {
+      myImage.setSrc(this.src);
+    }
+    return {
+      setSrc: function(src) {
+        myImage.setSrc('loading.jpg');
+        img.src = src;
+      }
+    }
+  })()
+  proxyImage.setSrc('http://loaded.jpg');
+  ```
+- 缓存代理
+  - 缓存代理实现乘积计算
+  ```javascript
+  const mult = function() {
+    let a = 1;
+    for(let i = 0, l; l = arguments[i++];) {
+      a = a * l;
+    }
+    return a;
+  }
+  const proxyMult = (function() {
+    const cache = {};
+    return function() {
+      const tag = Array.prototype.join.call(arguments, ',');
+      if (cache[tag]) {
+        return cache[tag]
+      }
+      cache[tag] = mult.apply(this, arguments);
+      return cache[tag];
+    }
+  })();
+  proxyMult(1, 2, 3, 4) // 24
+  proxyMult(1, 2, 3, 4) // 24
+  ```
+- 代理和被代理对象的一致性
+
 
 ## 发布-订阅模式
 事件发布/订阅模式（PubSub）在异步编程中帮助我们完成更松的解耦，甚至在MVC，MVVM的架构中以及设计模式中也少不了发布-订阅模式的参与
@@ -180,62 +313,6 @@ const adaptor = (function() {
   return obj;
 })()
 ```
-
-## 代理模式
-所谓的代理模式就是为一个对象找一个替代对象，以便对源对象进行访问
-常用的虚拟代理形式：某一个花销很大的操作，可以通过虚拟代理的方式延迟到这种需要它的时候才去创建
-- 保护代理
-- 虚拟代理
-  - 图片预加载
-  ```javascript
-  const myImage = (function () {
-    const imageNode = document.createElement('img');
-    document.body.appendChild(imageNode);
-    return {
-      setSrc: function (src) {
-        iamgeNode.src = src;
-      }
-    }
-  })()
-  const proxyImage = (function () {
-    const image = new Image();
-    image.onload = function() {
-      myImage.setSrc(this.src);
-    }
-    return {
-      setSrc: function(src) {
-        myImage.setSrc('loading.jpg');
-        img.src = src;
-      }
-    }
-  })()
-  proxyImage.setSrc('http://loaded.jpg');
-  ```
-- 缓存代理
-  - 缓存代理实现乘积计算
-  ```javascript
-  const mult = function() {
-    let a = 1;
-    for(let i = 0, l; l = arguments[i++];) {
-      a = a * l;
-    }
-    return a;
-  }
-  const proxyMult = (function() {
-    const cache = {};
-    return function() {
-      const tag = Array.prototype.join.call(arguments, ',');
-      if (cache[tag]) {
-        return cache[tag]
-      }
-      cache[tag] = mult.apply(this, arguments);
-      return cache[tag];
-    }
-  })();
-  proxyMult(1, 2, 3, 4) // 24
-  proxyMult(1, 2, 3, 4) // 24
-  ```
-- 代理和被代理对象的一致性
 
 ## 责任链模式
 类似于多米诺骨牌，请求第一个条件，会持续执行后续的条件，知道返回结果为止；
