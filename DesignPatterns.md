@@ -137,10 +137,13 @@ validator.add(registerForm.userName, 'minLength: 10', '用户名长度不能小�
 ```
 
 ## 代理模式
-所谓的代理模式就是为一个对象找一个替代对象，以便对源对象进行访问
-常用的虚拟代理形式：某一个花销很大的操作，可以通过虚拟代理的方式延迟到这种需要它的时候才去创建
+所谓的代理模式就是为一个对象提供一个代用品或者占位符，以便控制对它的访问；
+
+代理形式
 - 保护代理
+  - 用于控制不同权限的对象对目标对象的访问，但在javascript中并不容易实现保护代理，因为我们无法判断谁访问了某个对象
 - 虚拟代理
+  - 常用的虚拟代理形式：某一个花销很大的操作，可以通过虚拟代理的方式延迟到真正需要它的时候才去创建
   - 图片预加载
   ```javascript
   const myImage = (function () {
@@ -151,15 +154,15 @@ validator.add(registerForm.userName, 'minLength: 10', '用户名长度不能小�
         iamgeNode.src = src;
       }
     }
-  })()
+  })();
   const proxyImage = (function () {
-    const image = new Image();
-    image.onload = function() {
+    const image = new Image;
+    image.onload = function () {
       myImage.setSrc(this.src);
     }
     return {
       setSrc: function(src) {
-        myImage.setSrc('loading.jpg');
+        myImage.setSrc('./loading.jpg');
         img.src = src;
       }
     }
@@ -167,7 +170,7 @@ validator.add(registerForm.userName, 'minLength: 10', '用户名长度不能小�
   proxyImage.setSrc('http://loaded.jpg');
   ```
 - 缓存代理
-  - 缓存代理实现乘积计算
+  - 缓存代理实现计算乘积或者加和
   ```javascript
   const mult = function() {
     let a = 1;
@@ -176,22 +179,53 @@ validator.add(registerForm.userName, 'minLength: 10', '用户名长度不能小�
     }
     return a;
   }
-  const proxyMult = (function() {
+  const plus = function() {
+    let a = 1;
+    for(let i = 0, l; l = arguments[i++];) {
+      a = a + l;
+    }
+    return a;
+  } 
+  const createProxyFactory = function(fn) {
     const cache = {};
     return function() {
       const tag = Array.prototype.join.call(arguments, ',');
       if (cache[tag]) {
         return cache[tag]
       }
-      cache[tag] = mult.apply(this, arguments);
+      cache[tag] = fn.apply(this, arguments);
       return cache[tag];
     }
-  })();
-  proxyMult(1, 2, 3, 4) // 24
-  proxyMult(1, 2, 3, 4) // 24
+  };
+  const proxyMult = createProxyFactory(mult)
+  const proxyPlus = createProxyFactory(plus)
+  console.log(proxyMult(1, 2, 3, 4)) // 24
+  console.log(proxyMult(1, 2, 3, 4)) // 24
+  console.log(proxyPlus(1, 2, 3, 4)) // 10
   ```
 - 代理和被代理对象的一致性
+- 其他代理模式
+  - 防火墙代理：控制网络资源的访问，保护主机不让‘坏人’接近
+  - 远程代理：为一个对象在不同的地址空间提供局部代表，在java中，远程代理可以是另一个虚拟机中的对象
+  - 保护代理：用于对象应该有不同访问权限的情况
+  - 智能引用代理：取代了简单的指针，它在访问对象时执行一些附加操作，比如计算一个对象被引用的次数
+  - 写时复制代理：通常用于复制一个庞大对象的情况
 
+
+## 迭代器模式
+迭代器模式是指提供一种方法访问一个聚合对象中的各个元素，而又不需要暴露该对象的内部表示。
+迭代器模式可以把迭代的过程从业务逻辑中分离出来，在使用迭代器模式之后，即使不关心对象的内部构造，也可以按照顺序访问其中的每个元素；
+```javascript
+// 实现自己的迭代器
+var each = function(ary, callback) {
+  for(var i = 0; i < ary.length; i++) {
+    callback.call(ary[i], i, ary[i]);
+  }
+}
+each([1, 2, 3, 4], function(i, n) {
+  console.log([i, n])
+})
+```
 
 ## 发布-订阅模式
 事件发布/订阅模式（PubSub）在异步编程中帮助我们完成更松的解耦，甚至在MVC，MVVM的架构中以及设计模式中也少不了发布-订阅模式的参与
@@ -199,6 +233,8 @@ validator.add(registerForm.userName, 'minLength: 10', '用户名长度不能小�
 优点：在异步编程中实现更深的解耦
 
 缺点：如果过多的使用发布订阅模式，会增加维护的难度
+
+实现node的EventEmitter
 ```javascript
 function EventEmitter() {
   this._events = Object.create(null);
@@ -262,6 +298,105 @@ EventEmitter.prototype.prependListener = function (type, listener) {
 module.exports = EventEmitter;
 ```
 
+## 命令模式
+
+## 组合模式
+
+## 模板方法模式
+模板方法模式是一种只需要使用继承就可以实现的非常简单的模式
+
+模板方法模式由两部分组成
+- 抽象父类（通常在父类封装了子类的算法框架，包括实现一些公共方法以及封装子类中所有方法的执行顺序）
+- 具体的实现子类 （子类通过继承这个抽象父类，也继承了整个算法结构，并且可以选择重写父类的方法）
+
+例子
+Coffee or Tea
+```javascript
+// 首先分离公共点，即泡茶和咖啡的共同点；经过抽象，这两者都能整理为下面四步
+// - 把水煮沸
+// - 用沸水冲泡饮料
+// - 把饮料倒进杯子
+// - 加调料
+const Beverage = function() {}
+Beverage.prototype.boilWater = function() {
+  console.log('把水煮沸')
+}
+Beverage.prototype.brew = function() {} // 空方法，应该由子类重写
+Beverage.prototype.pourInput = function() {} // 空方法，应该由子类重写
+Beverage.prototype.addCondiments = function() {} // 空方法，应该由子类重写
+
+Beverage.prototype.init = function() {
+  this.boilWater();
+  this.brew();
+  this.pourInput();
+  this.addCondiments();
+}
+
+// 创建Coffee和Tea子类
+const Coffee = function() {};
+Coffee.prototype = new Beverage();
+Coffee.prototype.brew = function() {console.log('用沸水冲泡咖啡')}
+Coffee.prototype.pourInput = function() {console.log('把咖啡倒进杯子')}
+Coffee.prototype.addCondiments = function() {console.log('加糖和牛奶')}
+const coffee = new Coffee();
+coffee.init();
+
+const Tea = function() {};
+Tea.prototype = new Beverage();
+Tea.prototype.brew = function() {console.log('用沸水浸泡茶叶')}
+Tea.prototype.pourInput = function() {console.log('把茶倒进杯子')}
+Tea.prototype.addCondiments = function() {console.log('加柠檬')}
+const tea = new Tea();
+tea.init();
+
+// 到底谁是模板方法呢，答案是 Beverage.prototype.init
+```
+
+## 享元模式
+
+## 责任链模式
+类似于多米诺骨牌，请求第一个条件，会持续执行后续的条件，知道返回结果为止；
+```javascript
+// 场景: 某电商针对已付过定金的用户有优惠政策, 在正式购买后, 已经支付过 500 元定金的用户会收到 100 元的优惠券, 200 元定金的用户可以收到 50 元优惠券, 没有支付过定金的用户只能正常购买。
+
+// orderType: 表示订单类型, 1: 500 元定金用户；2: 200 元定金用户；3: 普通购买用户
+// pay: 表示用户是否已经支付定金, true: 已支付；false: 未支付
+// stock: 表示当前用于普通购买的手机库存数量, 已支付过定金的用户不受此限制
+const order500 = function (orderType, pay, stock) {
+  if (orderType === 1 && pay === true) {
+    console.log('500 元定金预购, 得到 100 元优惠券');
+  } else {
+    return 'nextSuccess';
+  }
+}
+const order200 = function (orderType, pay, stock) {
+  if (orderType === 2 && pay === true) {
+    console.log('200 元定金预购, 得到 100 元优惠券');
+  } else {
+    return 'nextSuccess';
+  }
+}
+const orderCommon = function (orderType, pay, stock) {
+  if ((orderType === 3 || !pay) && stock > 0) {
+    console.log('普通购买, 无优惠券')
+  } else {
+    console.log('库存不够, 无法购买')
+  }
+}
+Function.prototype.after = function (fn) {
+  const self = this;
+  return function() {
+    const result = self.apply(self, arguments)
+    if (result === 'nextSuccess') {
+      return fn.apply(self, arguments) // 这里 return 别忘记了~
+    }
+  }
+}
+const order = order500.after(order200).after(orderCommon)
+
+order(3, true, 500) // 普通购买, 无优惠券
+```
+
 ## 装饰器模式
 给一个函数赋能，增强它的某种能力，它能动态的添加对象的行为（动态地给函数赋能）
 ```javascript
@@ -312,49 +447,6 @@ const adaptor = (function() {
   }
   return obj;
 })()
-```
-
-## 责任链模式
-类似于多米诺骨牌，请求第一个条件，会持续执行后续的条件，知道返回结果为止；
-```javascript
-// 场景: 某电商针对已付过定金的用户有优惠政策, 在正式购买后, 已经支付过 500 元定金的用户会收到 100 元的优惠券, 200 元定金的用户可以收到 50 元优惠券, 没有支付过定金的用户只能正常购买。
-
-// orderType: 表示订单类型, 1: 500 元定金用户；2: 200 元定金用户；3: 普通购买用户
-// pay: 表示用户是否已经支付定金, true: 已支付；false: 未支付
-// stock: 表示当前用于普通购买的手机库存数量, 已支付过定金的用户不受此限制
-const order500 = function (orderType, pay, stock) {
-  if (orderType === 1 && pay === true) {
-    console.log('500 元定金预购, 得到 100 元优惠券');
-  } else {
-    return 'nextSuccess';
-  }
-}
-const order200 = function (orderType, pay, stock) {
-  if (orderType === 2 && pay === true) {
-    console.log('200 元定金预购, 得到 100 元优惠券');
-  } else {
-    return 'nextSuccess';
-  }
-}
-const orderCommon = function (orderType, pay, stock) {
-  if ((orderType === 3 || !pay) && stock > 0) {
-    console.log('普通购买, 无优惠券')
-  } else {
-    console.log('库存不够, 无法购买')
-  }
-}
-Function.prototype.after = function (fn) {
-  const self = this;
-  return function() {
-    const result = self.apply(self, arguments)
-    if (result === 'nextSuccess') {
-      return fn.apply(self, arguments) // 这里 return 别忘记了~
-    }
-  }
-}
-const order = order500.after(order200).after(orderCommon)
-
-order(3, true, 500) // 普通购买, 无优惠券
 ```
 
 ## 观察者模式
