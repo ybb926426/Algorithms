@@ -324,12 +324,18 @@ Beverage.prototype.boilWater = function() {
 Beverage.prototype.brew = function() {} // 空方法，应该由子类重写
 Beverage.prototype.pourInput = function() {} // 空方法，应该由子类重写
 Beverage.prototype.addCondiments = function() {} // 空方法，应该由子类重写
+Beverage.prototype.customerWantsCondients = function() { // hook方法，用来隔离变化
+  return true; // 默认需要调料
+}
 
 Beverage.prototype.init = function() {
   this.boilWater();
   this.brew();
   this.pourInput();
-  this.addCondiments();
+  if (this.customerWantsCondients()) { // 如果挂钩返回true，则需要调料
+    this.addCondiments();
+  }
+  
 }
 
 // 创建Coffee和Tea子类
@@ -338,6 +344,9 @@ Coffee.prototype = new Beverage();
 Coffee.prototype.brew = function() {console.log('用沸水冲泡咖啡')}
 Coffee.prototype.pourInput = function() {console.log('把咖啡倒进杯子')}
 Coffee.prototype.addCondiments = function() {console.log('加糖和牛奶')}
+Coffee.prototype.customerWantsCondients = function() {
+  return window.confirm('请问需要调料吗?')
+}
 const coffee = new Coffee();
 coffee.init();
 
@@ -352,7 +361,83 @@ tea.init();
 // 到底谁是模板方法呢，答案是 Beverage.prototype.init
 ```
 
-## 享元模式
+## 享元模式（flyweight）
+享元模式是一种用于性能优化的模式，核心是运用共享技术来有效的支持大量细粒度的对象
+
+享元模式要求将对象的属性划分为内部状态和外部状态（状态在这里通常指属性），享元模式的目标是尽量减少共享对象的数量
+
+如何划分内部状态和外部状态
+- 内部状态存储于对象内部
+- 内部状态可以被一些对象共享
+- 内部状态独立于具体的场景，通常不会变化
+- 外部状态取决于具体的场景，并根据场景而变化，外部状态不能被共享
+
+举个例子
+- 文件上传
+```javascript
+var id = 0;
+// 触发上传动作的 startUpload 函数
+window.startUpload = function(uploadType, files) {
+  for(var i = 0, file; file=files[i++]; ) {
+    var uploadObj = uploadManager.add(++id, uploadType, file.fileName, file.fileSize);
+  }
+}
+var Upload = function(uploadType) {
+  this.uploadType = uploadType;
+}
+Upload.prototype.delFile = function(id) {
+  uploadManger.setExternalState(id, this);
+  if (this.fileSize < 3000) {
+    return this.dom.parentNode.removeChild(this.dom);
+  }
+  if (window.confirm('确定要删除文件吗？' + this.fileName)) {
+    return this.dom.parentNode.removeChild(this.dom);
+  }
+}
+// 工厂进行对象实例化
+var UploadFactory = (function() {
+  var createdFlyWeightObjs = {};
+  return {
+    create: function(uploadType) {
+      if (createdFlyWeightObjs[uploadType]) {
+        return createdFlyWeightObjs[uploadType];
+      }
+      return createdFlyWeightObjs[uploadType] = new Upload(uploadType);
+    }
+  }
+})()
+// 管理器封装外部状态，负责向 UploadFactory提交创建对象的请求，并用一个uploadDatabase对象保存所有upload对象的外部状态
+var uploadManger = (function() {
+  var uploadDatabase = {};
+  return {
+    add: function(id, uplaodType, fileName, fileSize) {
+      var flyWeightObj = UploadFactory.create(uploadType);
+
+      var dom = document.createElement('div');
+      dom.innerHtml = `<span>文件名称：${fileName}，文件大小：${fileSize}</span><button class="delFile">删除</button>`
+      dom.querySelector('.delFile').onclick = function() {
+        flyWeightObj.delFile(id);
+      }
+
+      document.body.appendChild(dom);
+
+      uploadDatabase[id] = {
+        fileName,
+        fileSize,
+        dom
+      }
+
+      return flyWeightObj
+    },
+    setExternalState: function(id, flyWeightObj) {
+      var uploadData = uploadDatabase[id];
+      for(var i in uploadData) {
+        flyWeightObj[i] = uploadDate[i];
+      }
+    }
+  }
+})()
+```
 
 ## 责任链模式
 类似于多米诺骨牌，请求第一个条件，会持续执行后续的条件，知道返回结果为止；
