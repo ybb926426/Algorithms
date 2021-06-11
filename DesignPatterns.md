@@ -35,7 +35,7 @@ var a = new ProxyMode('aaa');
 var b = new ProxyMode('bbb');
 console.log(a === b); // 因为单体模式是只实例化一次，所以下面的实例是相等的
 ```
-惰性单例
+- 惰性单例
 惰性单例指的是在需要的时候才创建对象实例
 ```javascript
 var getSingle = function(fn) {
