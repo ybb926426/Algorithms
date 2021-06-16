@@ -675,3 +675,6 @@ obj.someFn()
     <td>vue 双向绑定</td>
   </tr>
 </table>
+
+模式
+原则
