@@ -4,7 +4,7 @@ const threeSum = function(nums) {
   // 对原数组排序
   nums.sort((a, b) => a - b);
 
-  for(let i = 0, n = nums - 2; i < n; i++) {
+  for(let i = 0, n = nums.length - 2; i < n; i++) {
     if (i > 0 && nums[i] === nums[i - 1]) continue;
 
     let left = i + 1, right = nums.length - 1;
