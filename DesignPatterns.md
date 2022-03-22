@@ -447,14 +447,77 @@ var uploadManger = (function() {
 
 ## 责任链模式
 责任链模式的定义是：使多个对象都有机会处理请求，从而避免请求的发送者和接受者之间的耦合关系，将这些对象连成一条链，并沿着这条链传递该请求，直到有一个对象处理它为止；
-类似于多米诺骨牌，请求第一个条件，会持续执行后续的条件，知道返回结果为止；
+类似于多米诺骨牌，请求第一个条件，会持续执行后续的条件，直到返回结果为止；
 
-责任链的优缺点
-- 最大优点就是解耦了请求发送者和N个接收者之间的复杂关系
-- 使用了责任链模式之后，链中的节点对象可以灵活的拆分重组
-- 可以手动指定起始节点
-- 缺点  不能保证某个请求一定会被链中的节点处理，这种情况下，我们可以在链尾增加一个保底的接收者来处理这种即将离开链尾的请求
-- 另外，责任链模式使得程序中多了一些节点对象，可能在某次请求传递过程中，大部分节点并没有起到实质性的作用，他们的作用仅仅是让请求传递下去，从性能方面考虑，我们要避免过长的责任链带来的性能耗损；
+```javascript
+const [ jack, lucy, lili ] = [
+  {
+    name: 'Jack',
+    requirement: '我要玩游戏'
+  },
+  {
+    name: 'Lucy',
+    requirement: '我要和4个人一起玩游戏'
+  },
+  {
+    name: 'Lili',
+    requirement: '我要和男盆友玩游戏'
+  }
+]
+const isSatisfyJack = (user) => {
+  // do something
+}
+const isSatisfyLucy = (user) => {
+  // do something
+}
+const isSatisfyLili = (user) => {
+  // do something
+}
+function playGame() {
+  if (isSatisfyJack()) {
+    console.log(`我可以和 Jack 一起玩游戏`)
+  } else if (isSatisfyLucy()) {
+    console.log(`我可以和 Lucy 一起玩游戏`)
+  } else if (isSatisfyLili()) {
+    console.log(`我可以和 Lili 一起玩游戏`)
+  } else {
+    console.log(`哎呀，我要一个人玩游戏`)
+  }
+}
+// 假如又多了个条件，我必须再修改playGame方法，这个其实是违反开放-封闭原则，不易于代码的维护
+```
+优化后的代码
+```javascript
+// 创建一个链条的函数或类
+const Chain = function(fn) {
+  this.fn = fn
+  this.successor = null
+}
+Chain.prototype.setNextSuccessor = function(successor) {
+  return this.successor = successor
+}
+Chain.prototype.passRequest = function() {
+  const ret = this.fn.apply(this, arguments)
+  if (ret === 'nextSuccessor') {
+    return this.successor && this.successor.passRequest.apply(this.successor, arguments)
+  }
+  return ret
+}
+
+const chainSatisfyJack = new Chain(isSatisfyJack) // 实例化Jack节点
+const chainSatisfyLucy = new Chain(isSatisfyLucy) // 实例化Lucy节点
+const chainSatisfyLili = new Chain(isSatisfyLili) // 实例化Lili节点
+
+// 设置一下职责链的顺序
+chainSatisfyJack.setNextSuccessor(chainSatisfyLucy)
+chainSatisfyLucy.setNextSuccessor(chainSatisfyLili)
+
+function playGameOptimization() {
+  chainSatisfyJack.passRequest() // 发起请求
+}
+```
+
+
 ```javascript
 // 场景: 某电商针对已付过定金的用户有优惠政策, 在正式购买后, 已经支付过 500 元定金的用户会收到 100 元的优惠券, 200 元定金的用户可以收到 50 元优惠券, 没有支付过定金的用户只能正常购买。
 
@@ -495,6 +558,80 @@ const order = order500.after(order200).after(orderCommon)
 
 order(3, true, 500) // 普通购买, 无优惠券
 ```
+
+```javascript
+const [ jack, lucy, lili ] = [
+  {
+    name: 'Jack',
+    requirement: '我要玩游戏'
+  },
+  {
+    name: 'Lucy',
+    requirement: '我要和4个人一起玩游戏'
+  },
+  {
+    name: 'Lili',
+    requirement: '我要和男盆友玩游戏'
+  }
+]
+const isSatisfyJack = (user) => {
+  // do something
+}
+const isSatisfyLucy = (user) => {
+  // do something
+}
+const isSatisfyLili = (user) => {
+  // do something
+}
+function playGame() {
+  if (isSatisfyJack()) {
+    console.log(`我可以和 Jack 一起玩游戏`)
+  } else if (isSatisfyLucy()) {
+    console.log(`我可以和 Lucy 一起玩游戏`)
+  } else if (isSatisfyLili()) {
+    console.log(`我可以和 Lili 一起玩游戏`)
+  } else {
+    console.log(`哎呀，我要一个人玩游戏`)
+  }
+}
+// 假如又多了个朋友，我必须再修改playGame方法，这个其实是违反开放-封闭原则，不易于代码的维护
+
+// 优化后的代码
+// 给每个人定义一个职责
+const Chain = function(fn) {
+  this.fn = fn
+  this.successor = null
+}
+Chain.prototype.setNextSuccessor = function(successor) {
+  return this.successor = successor
+}
+Chain.prototype.passRequest = function() {
+  const ret = this.fn.apply(this, arguments)
+  if (ret === 'nextSuccessor') {
+    return this.successor && this.successor.passRequest.apply(this.successor, arguments)
+  }
+  return ret
+}
+const chainOrderA = new Chain(isSatisfyJack)
+const chainOrderB = new Chain(isSatisfyLucy)
+const chainOrderC = new Chain(isSatisfyLili)
+
+// 设置一下职责链的顺序
+chainOrderA.setNextSuccessor(chainOrderB)
+chainOrderB.setNextSuccessor(chainOrderC)
+
+function playGameOptimization() {
+  chainOrder.passRequest() // 发起请求
+}
+```
+通过职责链模式，解耦了请求发送者和多个接收者之间的复杂关系，不再需要知道具体哪个接收者来接收发送的请求，只需要向职责链的第一个阶段发起请求
+责任链的优缺点
+- 最大优点就是解耦了请求发送者和N个接收者之间的复杂关系
+- 使用了责任链模式之后，链中的节点对象可以灵活的拆分重组
+- 可以手动指定起始节点
+- 缺点  不能保证某个请求一定会被链中的节点处理，这种情况下，我们可以在链尾增加一个保底的接收者来处理这种即将离开链尾的请求
+- 另外，责任链模式使得程序中多了一些节点对象，可能在某次请求传递过程中，大部分节点并没有起到实质性的作用，他们的作用仅仅是让请求传递下去，从性能方面考虑，我们要避免过长的责任链带来的性能耗损；
+
 ## 中介者模式
 中介者模式的作用就是解除对象和对象之间的紧耦合关系，增加一个中介者对象之后，所有的相关对象都通过中介者对象来通信
 
@@ -506,25 +643,77 @@ order(3, true, 500) // 普通购买, 无优惠券
 
 举个例子
 - 泡泡堂游戏
+- 聊天室
+```javascript
+// 公共类
+function Mediator() {
+  const users = []
+  return {
+    addUser(user) {
+      users.push(user)
+    },
+    publishMessage(msg, recevier) {
+      if (recevier) {
+        recevier.messages.push(msg)
+      } else {
+        users.forEach(user => {
+          user.messages.push(msg)
+        })
+      }
+    }
+  }
+}
+let mediator = Mediator()
+// 成员类
+function User(name) {
+  this.name = name
+  this.messages = []
+  mediator.addUser(this)
+}
+User.prototype.sendMessage = function(msg, receiver) {
+  // msg = '[' + this.name + ']: ' + msg
+  msg = `[${this.name}]: ${msg}`
+	mediator.publishMessage(msg, receiver)
+}
+let u1 = new User('Jack')
+let u2 = new User('Peter')
+let u3 = new User('Anna')
+u1.sendMessage('Hi, anybody here?')
+u2.sendMessage('Hi Jack, nice to meet you.', u1)
+u3.sendMessage('Hi Guys!')
+```
 
 ## 装饰器模式
 给一个函数赋能，增强它的某种能力，它能动态的添加对象的行为（动态地给函数赋能）
+原有方法维持不变，在原方法上挂载其它方法满足现有需求，实现同样的效果但增强了复用性
 ```javascript
-// AOP 装饰函数
+// AOP 装饰函数实现
 Function.prototype.before = function (fn) {
-  const self = this;
-  return function () {
-    fn.apply(new(self), arguments);
-    return fn.apply(new(self), arguments)
+  const self = this; // 保存原函数引用
+  return function () { // 返回包含了原函数和新函数的 '代理函数'
+    fn.apply(this, arguments); // 执行新函数，修正this
+    return fn.apply(this, arguments) // 执行原函数
   }
 }
 Function.prototype.after = function (fn) {
   const self = this;
   return function () {
-    fn.apply(new(self), arguments);
-    return fn.apply(new(self), arguments)
+    const ret = self.apply(this, arguments)
+    fn.apply(this, arguments);
+    return ret
   }
 }
+const func = function () {
+  console.log('func')
+}
+const func1 = function () {
+  console.log('func1')
+}
+const func2 = function () {
+  console.log('func2')
+}
+func = func.before(func1).after(func2)
+func()
 ```
 
 ## 观察者模式
@@ -598,31 +787,63 @@ obj.someFn()
 主要用于解决两个软件实体间接口之间不兼容的问题
 ```javascript
 // 老接口
-const zhejiangCityOld = (function () {
+const getCityOld = (function () {
   return [
     {
       name: 'hangzhou',
-      id: 11,
+      id: 1,
     },
     {
       name: 'jinhua',
-      id: 12
+      id: 2
     }
   ]
 })()
-console.log(getZhejiangCityOld())
-// 新接口希望是下面形式
-{
-  hangzhou: 11,
-  jinhua: 12,
-}
-const adaptor = (function() {
+// 新接口希望是下面形式 { hangzhou: 1, jinhua: 2 }
+const cityAdaptor = (function() {
   const obj = {};
-  for(let city of zhejiangCityOld) {
+  for(let city of getCityOld()) {
     obj[city.name] = city.id
   }
   return obj;
 })()
+```
+```typescript
+interface UploadFileType {
+  uuid: string;
+  name: string;
+  size: number;
+  type: string;
+  status: string;
+}
+```
+```javascript
+// 目标角色
+class Target {
+  request() {
+    return 'Target: The default target\'s behavior.'
+  }
+}
+// 源角色
+class Adaptee {
+  specialRequest() {
+    return 'Adaptee：The default Adaptee\'s behavior. '
+  }
+}
+// 适配器实现
+class Adapter extends Target {
+  constructor(adaptee) {
+    super()
+    this.adaptee = adaptee
+  }
+  request() {
+    this.adaptee.specialRequest()
+  }
+}
+let adaptee=new Adaptee();
+let adapter=new Adapter(adaptee);
+adapter.request();
+
 ```
 - 适配器模式主要是用来解决两个已有接口不匹配的问题，它不考虑这些接口是怎么实现的，也不考虑他们将来如何变化。适配器模式不需要改变已有的接口，就能够使它们协同工作
 - 装饰者模式和代理模式也不会改变原有对象的接口，但装饰者模式的作用是为了给对象增加功能，装饰者模式经常形成一条长的装饰链，而适配器模式通常只包装一次，代理模式是为了控制对象的访问，通常也只包装一次
@@ -637,7 +858,7 @@ const adaptor = (function() {
   <tr>
     <td>单例模式</td>
     <td>一个类只能构造出唯一实例</td>
-    <td>弹框层的实践</td>
+    <td>弹框层的实践，登录弹窗</td>
   </tr>
   <tr>
     <td>策略模式</td>
@@ -652,16 +873,16 @@ const adaptor = (function() {
   <tr>
     <td>迭代器模式</td>
     <td>能获取聚合对象的顺序和元素</td>
-    <td>each([1, 2, 3], cb)</td>
+    <td>实现迭代器each（forEach）</td>
   </tr>
   <tr>
     <td>发布-订阅模式</td>
     <td>PubSub</td>
-    <td></td>
+    <td>node的EventEmiter</td>
   </tr>
   <tr>
     <td>职责链模式</td>
-    <td>通过请求第一个条件，会持续执行后续的条件，直到返回结果为止</td>
+    <td>链式执行后续的条件，直到返回结果为止</td>
     <td>if else 优化</td>
   </tr>
   <tr>
