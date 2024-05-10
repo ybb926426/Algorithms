@@ -1,10 +1,14 @@
+# es6相关
+
 ## 使用箭头函数注意点
+
 - 箭头函数内的this对象就是定义时所在的对象，而不是使用时所在的对象
 - 不可以当做构造函数，也就是说，不可以使用new命令
 - 不可以使用arguments对象，该对象在函数体内不存在，如果要用，可以用rest参数代替
 - 不可以使用yield命令，因此箭头函数不能用于Generator函数中
 
 ## es6
+
 - let/const
 - 箭头函数
 - iterator 迭代器
@@ -13,7 +17,7 @@
 - 对象属性/方法简写
 - for of 循环
   - for of 循环可以用来遍历iterate可迭代对象，返回键值
-    - 只能用在可迭代对象上，获取的是迭代器返回的value值； 
+    - 只能用在可迭代对象上，获取的是迭代器返回的value值；
     - 只遍历当前对象不会遍历它的原型链
     - 对于数组的遍历，只返回数组下标对应的属性值
   - for in 循环主要是为了遍历对象而生，键名
@@ -30,8 +34,8 @@
   - 不能拷贝不可枚举的属性
   - 保证target始终是一个对象，如果传入基本数据类型，会转为基本包装类型，null/undefined传入会报错
 
-
 ## css放头部，js放尾部的原因
+
 - css放头部
   - 在加载html生成DOM tree的时候，就可以同时对DOM tree进行渲染
   - 可以防止闪跳，白屏或者布局混乱
@@ -40,22 +44,25 @@
   - js加载后会立即执行，同时会阻塞后面的资源加载
 
 ## tree-shaking实现原理
-  - ES6 Module 引入进行静态分析，故而编译的时候正确判断到底加载了哪些模块
-  - 静态分析程序流，判断哪些模块和变量未被使用或者引用，进而删除对应的代码
 
-  - 利用了 es6 的模块特性
-    - 只能作为模块顶层的语句出现
-    - import 的模块名只能是字符串常量
-    - import binding 是 immutable（不可改变的） 的
+- ES6 Module 引入进行静态分析，故而编译的时候正确判断到底加载了哪些模块
+- 静态分析程序流，判断哪些模块和变量未被使用或者引用，进而删除对应的代码
+
+- 利用了 es6 的模块特性
+  - 只能作为模块顶层的语句出现
+  - import 的模块名只能是字符串常量
+  - import binding 是 immutable（不可改变的） 的
 
 ## flex 布局
-  - flex: 1 ; flex是 flex-grow，flex-shrink，flex-basis的缩写，默认是 0 1 auto；
-    - flex-grow 属性定义项目的放大比例，默认是0，即如果存在剩余空间，也不放大
-    - flex-shrink 属性定义了项目的缩小比例，默认是1，即如果空间不足，该项目将缩小
-    - flex-basis 属性定义了在分配多余空间之前，项目占据的主轴空间（main size）。浏览器根据这个属性，计算主轴是否有多余空间。它的默认值为auto，即项目的本来大小
-  - flex-flow 是 flex-direction 属性和 flex-wrap 属性的简写形式，默认是 row nowrap；
+
+- flex: 1 ; flex是 flex-grow，flex-shrink，flex-basis的缩写，默认是 0 1 auto；
+  - flex-grow 属性定义项目的放大比例，默认是0，即如果存在剩余空间，也不放大
+  - flex-shrink 属性定义了项目的缩小比例，默认是1，即如果空间不足，该项目将缩小
+  - flex-basis 属性定义了在分配多余空间之前，项目占据的主轴空间（main size）。浏览器根据这个属性，计算主轴是否有多余空间。它的默认值为auto，即项目的本来大小
+- flex-flow 是 flex-direction 属性和 flex-wrap 属性的简写形式，默认是 row nowrap；
 
 ## 实现一个发布订阅Event
+
 ```javascript
 let event = {
   list: {},

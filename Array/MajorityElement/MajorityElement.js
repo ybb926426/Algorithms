@@ -25,7 +25,8 @@ const majorityElement2 = (nums) => {
     } else {
       count--;
       if (count === 0) {
-        current = nums[i+1];
+        current = nums[i];
+        count++;
       }
     }
   }

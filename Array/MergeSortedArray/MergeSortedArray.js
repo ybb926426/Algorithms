@@ -31,7 +31,7 @@ const MergeSortedArray2 = (nums1, m, nums2, n) => {
     } else {
       current = nums2[len2++]
     }
-    sorted[p1 + p2 -1] = current;
+    sorted[len1 + len2 -1] = current;
   }
   for(let i = 0; i != m + n; i++) {
     nums1[i] = sorted[i];
