@@ -340,3 +340,27 @@ function isBalanceHandel(root) {
     return Math.max(left, right) + 1;
 }
 ```
+
+## 请实现两个函数，分别用来序列化和反序列化二叉树
+
+思路
+
+- 若一个二叉树是不完全的，我们至少需要两个遍历才能将它重建
+- 但这种方式仍然有一定的局限性，比如二叉树中不能出现重复节点
+- 如果二叉树是一颗完全二叉树，我们只需要知道前序遍历即可将它重建
+- 因此在序列化二叉树时，可以将空节点使用特殊符号存储起来，这样可以模拟一颗完全二叉树的前序遍历
+- 在重建二叉树时，遇到特殊符号时当作空节点处理
+
+```js
+function Serialize(pRoot, arr = []) {
+  if (!pRoot) {
+    arr.push('#');
+  }
+  else {
+    arr.push(pRoot.val);
+    Serialize(pRoot.left, arr);
+    Serialize(pRoot.right, arr);
+  }
+  return arr.join(',');
+}
+```
