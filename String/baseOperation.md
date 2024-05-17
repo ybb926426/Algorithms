@@ -109,3 +109,103 @@ function LeftRotateString(str, n) {
 ```
 
 ## 字符流中第一个不重复的字符
+
+```js
+function firstUniqChar(str) {
+  
+}
+```
+
+## 括号生成
+
+数字 n 代表生成括号的对数，请你设计一个函数，用于能够生成所有可能的并且 有效的 括号组合
+
+回溯的过程
+
+- 如果当前已经放置的左括号数量小于n，我们可以选择放置一个左括号
+- 递归地调用backtrace函数，将open + 1，将close保持不变，并在当前括号组合字符串的末尾添加一个左括号
+- 如果当前已经放置的右括号数量小于已经放置的左括号数量，我们可以选择放置一个右括号，我们递归调用backtrack函数,将open的值保持不变,close的值加1,并在当前括号组合字符串current的末尾添加一个右括号')'
+
+```js
+// 回溯
+function generateParenthesis (n) {
+  const result = [];
+
+  function backtrace(open, close, current) {
+    if (current.length === 2 * n) {
+      result.push(current);
+      return;
+    }
+
+    if (open < n) {
+      backtrace(open + 1, close, current + '(')
+    }
+    if (close < open) {
+      backtrace(open, close + 1, current + ')')
+    }
+  }
+
+  backtrace(0, 0, '');
+  return result;
+}
+```
+
+## 最长公共前缀
+
+编写一个函数来查找字符串数组中的最长公共前缀。如果不存在公共前缀，返回空字符串 ""。
+
+例子1: 输入: strs = ["flower", "flow", "flight"] 输出: "fl" 解释: 这三个字符串的最长公共前缀是"fl"
+例子2: 输入: strs = ["dog", "racecar", "car"] 输出: "" 解释: 这三个字符串没有公共前缀,因此返回空字符串""
+
+```js
+function longestCommonPrefix(strs) {
+  if (!strs || !strs.length) {
+    return '';
+  }
+
+  let prefix = strs[0];
+  for (let i = 1; i < strs.length; i++) {
+    while (strs[i].indexOf(prefix) !== 0) {
+      prefix = prefix.slice(0, -1);
+      if (prefix === '') {
+        return '';
+      }
+    }
+  }
+  return prefix;
+}
+```
+
+## 最长回文子串
+
+指在一个给定的字符串中找到最长的回文子串。回文是指一个字符串正序和倒序读取都是一样的,例如"level"、"noon"等
+
+例如,对于字符串"babad",最长的回文子串是"bab",对于字符串"cbbd",最长的回文子串是"bb"
+
+```js
+function longestPalindrome (s) {
+  if (s.length < 2) {
+    return s;
+  }
+
+  let start = 0;
+  let maxLength = 1;
+
+  function expandAroundCenter(left, right) {
+    while (left >= 0 && right < s.length && s[left] === s[right]) {
+      const currentLength = right - left + 1;
+      if (currentLength > maxLength) {
+        start = left;
+        maxLength = currentLength;
+      }
+      left--;
+      right++;
+    }
+  }
+  for (let i = 0; i < s.length; i++) {
+    expandAroundCenter(i, i); // 处理奇数长度的回文
+    expandAroundCenter(i, i + 1); // 处理偶数长度的回文
+  }
+  return s.substring(start, start + maxLength);
+}
+```

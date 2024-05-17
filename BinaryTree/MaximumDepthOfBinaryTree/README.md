@@ -2,8 +2,7 @@
 
 [leetcode 104](https://leetcode-cn.com/problems/maximum-depth-of-binary-tree/)
 
-
-##题目描述
+## 题目描述
 
 给定一个二叉树，找出其最大深度。
 
@@ -13,11 +12,12 @@
 
 示例：
 给定二叉树 [3,9,20,null,null,15,7]
-```
+
+```yaml
     3
    / \
   9  20
     /  \
    15   7
+# 返回它的最大深度 3
 ```
-返回它的最大深度 3

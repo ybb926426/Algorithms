@@ -1,5 +1,22 @@
 # 链表的基本操作
 
+## 常见算法题
+
+- 基本结构
+- 从头到尾打印链表
+- 反转链表
+- 复杂链表的复制
+- 合并两个排序的链表
+- 链表倒数第k个节点
+- 链表中环的入口
+- 两个链表的第一个公共节点(相交链表)
+- 链表中倒数第k个节点
+- 删除链表中的节点or重复的节点
+- 排序链表 ⭐⭐⭐
+- 通过链表的后续遍历判断回文链表问题
+- 合并 K 个升序链表 ⭐⭐⭐⭐
+- 回文链表
+
 ## 基本结构
 
 ```js
@@ -9,7 +26,7 @@ class Node {
     this.next = null;
   }
 }
-
+// 要实现的基本功能：链表末尾添加节点、指定位置插入/删除节点、删除指定数据的节点、获取指定位置的节点数据
 class LinkedList {
   constructor() {
     this.head = null;
@@ -207,6 +224,28 @@ function reverseList(head) {
 思路
 
 ```js
+function CopyRandomList (head) {
+  if (!head) {
+    return null;
+  }
+  const map = new Map();
+  let current = head;
+
+  while (current !== null) {
+    const copyNode = new Node(current.val);
+    map.set(current, copyNode);
+    current = current.next;
+  }
+
+  current = head;
+  while (current !== null) {
+    map.get(current).next = map.get(current.next) || null;
+    map.get(current).random = map.get(current.random) || null;
+    current = current.next;
+  }
+
+  return map.get(head);
+}
 ```
 
 ## 合并两个排序的链表
@@ -418,6 +457,144 @@ function getLength (head) {
 }
 ```
 
-## 删除链表中的节点or重复的节点
+## 删除链表中的节点
 
 给定单链表的头指针和要删除的指针节点，在O(1)时间内删除该节点。
+
+- 删除的节点不是尾部节点 - 将next节点覆盖当前节点
+- 删除的节点是尾部节点且等于头节点，只剩一个节点 - 将头节点置为null
+- 删除的节点是尾节点且前面还有节点 - 遍历到末尾的前一个节点删除
+
+```js
+function deleteNode(head, node) {
+  if (head === null || node === null) {
+    return head;
+  }
+  if (node.next) {
+    node.val = node.next.val;
+    node.next = node.next.next;
+  } else if (head === node) {
+    node = null;
+    head = null;
+  } else {
+    let current = head;
+    while (current.next !== node) {
+      current = current.next;
+    }
+    current.next = null;
+  }
+  return head;
+}
+```
+
+## 删除链表中的重复的节点
+
+思路1
+
+- 存储链表中元素出现的次数
+- 用一个map存储每个节点出现的次数
+- 删除出现次数大于1的节点
+
+```js
+function deleteDuplicates(pHead) {
+  if (pHead === null || pHead.next === null) {
+    return pHead;
+  }
+  const map = new Map();
+  let current = pHead;
+  while (current) {
+    if (map.has(current.val)) {
+      map.set(current.val, map.get(current.val) + 1);
+    } else {
+      map.set(current.val, 1);
+    }
+    current = current.next;
+  }
+
+  current = pHead;
+  let prev = null;
+  while (current) {
+    const val = map.get(current.val);
+    if (val > 1) {
+      if (current === pHead) {
+        pHead = pHead.next;
+        current = pHead;
+      } else {
+        prev.next = current.next;
+        current = prev.next;
+      }
+    } else {
+      prev = current;
+      current = current.next;
+    }
+  }
+  return pHead;
+}
+```
+
+思路2
+
+- 重新比较连接数组
+- 链表是排好顺序的，所以重复元素都会相邻出现 递归链表
+- 当前节点或当前节点的next为空，返回该节点
+- 当前节点是重复节点：找到后面第一个不重复的节点
+- 当前节点不重复：将当前的节点的next赋值为下一个不重复的节点
+
+```js
+function deleteDuplication (pHead) {
+  if (!pHead || !pHead.next) {
+    return pHead;
+  } else if (pHead.val === pHead.next.val) {
+    let templateNode = pHead.next;
+    while (templateNode && templateNode.val === pHead.val) {
+      templateNode = templateNode.next;
+    }
+    return deleteDuplication(templateNode);
+  } else {
+    pHead.next = deleteDuplication(pHead.next);
+    return pHead;
+  }
+}
+```
+
+## 排序链表
+
+```js
+function sortList(head) {
+  if (head === null || head.next === null) {
+    return head;
+  }
+  // 快慢指针找到中间节点
+  let fast = head;
+  let slow = head;
+  while (fast && fast.next) {
+    fast = fast.next.next;
+    slow = slow.next;
+  }
+  const mid = slow.next;
+  slow.next = null;
+
+  const left = sortList(head);
+  const right = sortList(mid);
+
+  return merge(left, right);
+}
+
+function merge(left, right) {
+  const dummy = new ListNode(0);
+  let current = dummy;
+
+  while (left !== null && right !== null) {
+    if (left.val < right.val) {
+      current.next = 
+    }
+  }
+}
+
+```
+
+## 通过链表的后续遍历判断回文链表问题
+
+## 回文链表
+
+## 合并 K 个升序链表 ⭐⭐⭐⭐
