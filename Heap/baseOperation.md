@@ -91,3 +91,7 @@ function minHeadPop (array = []) {
   return result;
 }
 ```
+
+### 数据流中的中位数
+
+### 最小的k个数
