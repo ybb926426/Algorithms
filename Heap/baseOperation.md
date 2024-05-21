@@ -94,4 +94,73 @@ function minHeadPop (array = []) {
 
 ### 数据流中的中位数
 
+如何得到一个数据流中的中位数？如果从数据流中读出奇数个数值，那么中位数就是所有数值排序之后位于中间的数值
+
+如果从数据流中读出偶数个数值，那么中位数就是所有数值排序之后中间两个数的平均值。我们使用Insert()方法读取数据流，使用GetMedian()方法获取当前读取数据的中位数
+
+思路：
+
+- 维护一个大顶堆，一个小顶堆，数据总数：
+  - 小顶堆里的值大于大顶堆里的
+  - 两个堆的元素个数相差不能超过1
+- 当插入数字后数据总数为奇数时：使小顶堆个数比大顶堆多1；当插入数据后数据总数为偶数时：使大顶堆和小顶堆个数一样
+- 当总数字个数为奇数时，中位数就是小顶堆的堆顶元素；当总数个数为偶数时，中位数就是两个堆顶元素的平均值
+
+```js
+class Heap {
+  constructor (type = 'min') {
+    this.type = type;
+    this.value = [];
+    this.count = 0;
+  }
+  add (element) {
+    const array = this.value;
+    array.push(element);
+    if (array.length > 1) {
+      let index = array.length - 1;
+      let target = Math.floor((index - 1) / 2);
+
+      while (target >= 0) {
+        if (this.type === 'min' && array[index] < array[target] || this.type === 'max' && array[index] > array[target]) {
+          [array[index], array[target]] = [array[target], array[index]];
+          index = target;
+          target = Math.floor((index - 1) / 2);
+        } else {
+          break;
+        }
+      }
+    }
+  }
+  adjust () {
+    const array = this.value;
+    
+  }
+  pop () {
+    const array = this.value;
+    let result = null;
+    if (array.length > 1) {
+      result = array[0];
+      array[0] = array.pop();
+      ajustMinHeap(array, 0, array.length);
+    } else if (array.length === 1) {
+      return array.pop();
+    } else {
+      return result;
+    }
+  }
+}
+const maxHeap = new Heap('max');
+const minHeap = new Heap('min');
+let count = 0;
+function insert (num) {
+  count++;
+  if (count % 2 === 1) {
+    maxHead.add(num);
+  }
+}
+function getMedian (nums) {
+
+}
+```
+
 ### 最小的k个数
